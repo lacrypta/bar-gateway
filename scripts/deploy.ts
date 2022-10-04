@@ -15,7 +15,10 @@ async function main() {
 
   // We get the contract to deploy
   const Gateway = await ethers.getContractFactory("BarGateway");
-  const gateway = await Gateway.deploy();
+  const gateway = await Gateway.deploy([
+    "0x78a486306D15E7111cca541F2f1307a1cFCaF5C4",
+    "La Crypta Bar",
+  ]);
 
   await gateway.deployed();
 
