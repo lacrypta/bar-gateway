@@ -7,6 +7,9 @@
     "deploy": "hardhat run ./scripts/deploy.ts"
   },
   "devDependencies": {
+    "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/bytes": "^5.7.0",
+    "@ethersproject/providers": "^5.7.1",
     "@nomiclabs/hardhat-ethers": "^2.1.1",
     "@nomiclabs/hardhat-etherscan": "^2.1.8",
     "@openzeppelin/contracts": "^4.7.3",
@@ -28,6 +31,7 @@
     "hardhat": "^2.11.2",
     "hardhat-deploy": "^0.11.15",
     "lacrypta-gateway": "^0.8.3",
+    "lodash": "^4.17.21",
     "prettier": "^2.7.1",
     "prettier-plugin-solidity": "^1.0.0-beta.24",
     "solhint": "^3.3.7",
