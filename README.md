@@ -1,2 +1,3 @@
 # bar-gateway
- La Crypta Bar Gateway contract
+
+La Crypta Bar Gateway contract
