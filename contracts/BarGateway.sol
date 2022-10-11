@@ -13,4 +13,43 @@ contract BarGateway is ERC20PermitGateway {
     //
     // To serve a voucher (1): serveVoucher(voucher, r, s, v)
     // To serve a voucher (2): serveVoucher(voucher, sig)
+    //
+    //
+    // Vouchers:
+    //   PermitVoucher:
+    //
+    //     Voucher permitVoucher = Voucher(
+    //       0x77ed603f,       // tag --- constant (see: ERC20PermitGateway.PERMIT_VOUCHER_TAG)
+    //       nonce,            // nonce --- random
+    //       deadline,         // voucher deadline
+    //       abi.encode(       // payload
+    //         PermitVoucher(
+    //             owner,      // funds owner
+    //             spender,    // funds spender
+    //             value,      // funds being permitted
+    //             deadline,   // permit deadline
+    //             v,          // signature "v"
+    //             r,          // signature "r"
+    //             s           // signature "s"
+    //         )
+    //       ),
+    //       bytes()           // metadata --- empty
+    //     );
+    //
+    //   TransferFromVoucher:
+    //
+    //     Voucher transferFromVoucher = Voucher(
+    //       0xf7d48c1c,             // tag -- constant (see: ERC20Gateway.TRANSFER_FROM_VOUCHER_TAG)
+    //       nonce,                  // nonce --- random
+    //       deadline,               // voucher deadline
+    //       abi.encode(             // payload
+    //         TransferFromVoucher(
+    //           from,               // transfer source
+    //           to,                 // transfer destination
+    //           amount              // transfer amount
+    //         )
+    //       ),
+    //       bytes()                 // metadata --- empty
+    //     );
+    //
 }
