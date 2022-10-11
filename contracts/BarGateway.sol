@@ -4,11 +4,9 @@ pragma solidity ^0.8.17;
 import {ERC20PermitGateway} from "lacrypta-gateway/contracts/ERC20PermitGateway.sol";
 
 
-address constant PERONIO_ADDRESS = 0x78a486306D15E7111cca541F2f1307a1cFCaF5C4;
-
 contract BarGateway is ERC20PermitGateway {
 
-    constructor() ERC20PermitGateway(PERONIO_ADDRESS) {}
+    constructor(address _peronio) ERC20PermitGateway(_peronio) {}
 
     // To obtain message to be signed from voucher: stringifyVoucher(voucher)
     //   The signing procedure _should_ sign the _hash_ of this message
