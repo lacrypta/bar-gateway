@@ -15,3 +15,8 @@ cache
 
 # Yarn error log
 yarn-error.log
+
+# Non-matic deployments
+deployments/**
+!deployments/matic
+!deployments/matic/**
