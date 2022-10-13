@@ -14,11 +14,14 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const Gateway = await ethers.getContractFactory("BarGateway");
-  const gateway = await Gateway.deploy([
-    "0x78a486306D15E7111cca541F2f1307a1cFCaF5C4",
-    "La Crypta Bar",
-  ]);
+  const ToString = await ethers.getContractFactory("ToString");
+  const toString = await ToString.deploy();
+  const Gateway = await ethers.getContractFactory("BarGateway", {
+    libraries: { ToString: toString.address },
+  });
+  const gateway = await Gateway.deploy(
+    "0x78a486306D15E7111cca541F2f1307a1cFCaF5C4"
+  );
 
   await gateway.deployed();
 
