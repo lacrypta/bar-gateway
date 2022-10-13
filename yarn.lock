@@ -510,6 +510,11 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
+"@lacrypta/gateway@^0.8.9":
+  version "0.8.9"
+  resolved "https://registry.yarnpkg.com/@lacrypta/gateway/-/gateway-0.8.9.tgz#389f4f15aaf0cca3b9a3dba6969d18824c294cdd"
+  integrity sha512-FP6FBqxzaj7GKZX0zZGnAhkVg5A5GLcN9B391Ifza1cVRac4k/m+LkMBq+DoiYzk8r9o77dNYOWOX5b6S50iKQ==
+
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@metamask/eth-sig-util/-/eth-sig-util-4.0.1.tgz#3ad61f6ea9ad73ba5b19db780d40d9aae5157088"
@@ -5797,11 +5802,6 @@ klaw@^1.0.0:
   integrity sha512-TED5xi9gGQjGpNnvRWknrwAB1eL5GciPfVFOt3Vk1OJCVDQbzuSfrF3hkUQKlsgKrG1F+0t5W0m+Fje1jIt8rw==
   optionalDependencies:
     graceful-fs "^4.1.9"
-
-lacrypta-gateway@^0.8.3:
-  version "0.8.7"
-  resolved "https://registry.yarnpkg.com/lacrypta-gateway/-/lacrypta-gateway-0.8.7.tgz#b22b62d3bcc196b674fd2f98d84c887ee7674868"
-  integrity sha512-VKU9oUrwctRSDllVPth4UYRQDvLTSjAZExBontr5P1s7K+hFy3GSDLNnyhyl9VlqYXtbOK7KbpLhc8hqYZrwCA==
 
 lcid@^1.0.0:
   version "1.0.0"
