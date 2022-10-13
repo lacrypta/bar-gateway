@@ -3,7 +3,8 @@
 //
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
-import { ethers } from "hardhat";
+import hre from "hardhat";
+import "console";
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -13,19 +14,36 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  // We get the contract to deploy
-  const ToString = await ethers.getContractFactory("ToString");
-  const toString = await ToString.deploy();
-  const Gateway = await ethers.getContractFactory("BarGateway", {
-    libraries: { ToString: toString.address },
+  const { deployer } = await hre.getNamedAccounts();
+
+  const peronioAddress = "0x78a486306D15E7111cca541F2f1307a1cFCaF5C4";
+
+  await hre.deployments.deploy("ToString", {
+    contract: "ToString",
+    from: deployer,
+    log: true,
+    args: [],
   });
-  const gateway = await Gateway.deploy(
-    "0x78a486306D15E7111cca541F2f1307a1cFCaF5C4"
-  );
+  const toStringAddress = (await hre.deployments.get("ToString")).address;
+  console.log("ToString library deployed to:", toStringAddress);
 
-  await gateway.deployed();
+  await hre.deployments.deploy("BarGateway", {
+    contract: "BarGateway",
+    from: deployer,
+    log: true,
+    args: [peronioAddress],
+    libraries: { ToString: toStringAddress },
+  });
+  const barGatewayAddress = (await hre.deployments.get("BarGateway")).address;
+  console.log("Bar Gateway deployed to:", barGatewayAddress);
 
-  console.log("Gateway deployed to:", gateway.address);
+  if (hre.network.name == "matic") {
+    await hre.run("verify:verify", { address: toStringAddress });
+    await hre.run("verify:verify", {
+      address: barGatewayAddress,
+      constructorArguments: [peronioAddress],
+    });
+  }
 }
 
 // We recommend this pattern to be able to use async/await everywhere
