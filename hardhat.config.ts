@@ -20,8 +20,48 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
+const GAS_PRICE = parseFloat(process.env.GAS_PRICE || "1");
+
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY ?? "";
+
 const config: HardhatUserConfig = {
-  solidity: "0.8.17",
+  solidity: {
+    compilers: [
+      {
+        version: "0.8.17",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 2000,
+            details: {
+              peephole: true,
+              inliner: true,
+              jumpdestRemover: true,
+              orderLiterals: true,
+              deduplicate: true,
+              cse: true,
+              constantOptimizer: true,
+              yul: true,
+              yulDetails: {
+                stackAllocation: true,
+              },
+            },
+          },
+        },
+      },
+    ],
+  },
+  networks: {
+    matic: {
+      timeout: 1000000,
+      chainId: 137,
+      url: "http://localhost:1248",
+      gasPrice: GAS_PRICE * 10 ** 9,
+    },
+  },
+  etherscan: {
+    apiKey: ETHERSCAN_API_KEY,
+  },
 };
 
 export default config;
