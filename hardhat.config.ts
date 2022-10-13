@@ -5,6 +5,8 @@ import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-ethers";
 import "@typechain/hardhat";
 
+import "hardhat-deploy";
+
 dotenv.config();
 
 // This is a sample Hardhat task. To learn how to create your own go to
