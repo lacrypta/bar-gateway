@@ -6,6 +6,11 @@
     "compile": "hardhat compile",
     "deploy": "hardhat run ./scripts/deploy.ts"
   },
+  "files": [
+    "contracts/**",
+    "typechain/**",
+    "deployments/matic/**"
+  ],
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/bytes": "^5.7.0",
