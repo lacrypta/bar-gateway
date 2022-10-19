@@ -1,6 +1,6 @@
 {
   "name": "@lacrypta/bar-gateway",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "license": "AGPL-3.0-or-later",
   "repository": {
     "type": "git",
@@ -8,12 +8,14 @@
   },
   "scripts": {
     "compile": "hardhat compile",
+    "postcompile": "find typechain -type f -exec sed -i -r 's/\"([^(]+)\\(.*\"\\(/\\1(/g' {} \\;",
     "deploy": "hardhat run ./scripts/deploy.ts"
   },
   "files": [
     "contracts/**",
     "typechain/**",
-    "deployments/matic/**"
+    "deployments/matic/**",
+    "artifacts/contracts/**"
   ],
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
