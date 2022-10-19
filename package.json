@@ -8,7 +8,7 @@
   },
   "scripts": {
     "compile": "hardhat compile",
-    "postcompile": "find typechain -type f -exec sed -i -r 's/\"([^(]+)\\(.*\"\\(/\\1(/g' {} \\;",
+    "postcompile": "yarn typechain --target=ethers-v5 'deployments/hardhat/*.json' --out-dir=typechain",
     "deploy": "hardhat run ./scripts/deploy.ts"
   },
   "files": [
