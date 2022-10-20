@@ -6,10 +6,8 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {Gateway} from "@lacrypta/gateway/contracts/Gateway.sol";
-import {IERC20Gateway} from "@lacrypta/gateway/contracts/IERC20Gateway.sol";
 
 import {ToString} from "@lacrypta/gateway/contracts/ToString.sol";
-
 
 import {IBarGateway} from "./IBarGateway.sol";
 
