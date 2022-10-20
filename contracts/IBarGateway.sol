@@ -10,25 +10,16 @@ import {IGateway} from "@lacrypta/gateway/contracts/IGateway.sol";
 interface IBarGateway is IGateway {
 
     /**
-     * Lite item description
-     *
-     * @custom:member item  The item name
-     * @custom:member value  The item's value (could be negative)
-     */
-    struct LineItem {
-        string item;
-        int256 value;
-    }
-
-    /**
      * Purchase voucher
      *
      * @custom:member from  The address from which to transfer funds
-     * @custom:member lineItems  The line items in the purchase (the item's total must be non-negative)
+     * @custom:member amount  The total amount of funds to transfer
+     * @custom:member message  The message to show to the end user
      */
     struct PurchaseVoucher {
         address from;
-        LineItem[] lineItems;
+        uint256 amount;
+        string message;
     }
 
     /**
@@ -51,18 +42,20 @@ interface IBarGateway is IGateway {
      * @param nonce  Nonce to use
      * @param deadline  Voucher deadline to use
      * @param from  Transfer origin to use
-     * @param lineItems  Line items to use
+     * @param amount  Amount to use
+     * @param message  Message to use
      * @return voucher  The generated voucher
      */
-    function buildPurchaseVoucher(uint256 nonce, uint256 deadline, address from, LineItem[] calldata lineItems) external view returns (Voucher memory voucher);
+    function buildPurchaseVoucher(uint256 nonce, uint256 deadline, address from, uint256 amount, string calldata message) external view returns (Voucher memory voucher);
 
     /**
      * Build a PurchaseVoucher from the given parameters
      *
      * @param nonce  Nonce to use
      * @param from  Transfer origin to use
-     * @param lineItems  Line items to use
+     * @param amount  Amount to use
+     * @param message  Message to use
      * @return voucher  The generated voucher
      */
-    function buildPurchaseVoucher(uint256 nonce, address from, LineItem[] calldata lineItems) external view returns (Voucher memory voucher);
+    function buildPurchaseVoucher(uint256 nonce, address from, uint256 amount, string calldata message) external view returns (Voucher memory voucher);
 }

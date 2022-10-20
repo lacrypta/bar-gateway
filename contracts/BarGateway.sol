@@ -2,12 +2,9 @@
 pragma solidity ^0.8.17;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {Gateway} from "@lacrypta/gateway/contracts/Gateway.sol";
-
-import {ToString} from "@lacrypta/gateway/contracts/ToString.sol";
 
 import {IBarGateway} from "./IBarGateway.sol";
 
@@ -17,9 +14,6 @@ import {IBarGateway} from "./IBarGateway.sol";
  */
 contract BarGateway is Gateway, IBarGateway {
     using SafeERC20 for IERC20;
-    using ToString for address;
-    using ToString for uint256;
-    using ToString for int256;
 
     // address of the underlying ERC20 token
     address internal immutable _token;
@@ -32,7 +26,7 @@ contract BarGateway is Gateway, IBarGateway {
     // This is computed using the "encodeType" convention laid out in <https://eips.ethereum.org/EIPS/eip-712#definition-of-encodetype>.
     // Note that it is not REQUIRED to be so computed, but we do so anyways to minimize encoding conventions.
     uint32 public constant PURCHASE_VOUCHER_TAG =
-        uint32(bytes4(keccak256("PurchaseVoucher(address from,LineItem[] lineItems)LineItem(string item,int256 value)")));
+        uint32(bytes4(keccak256("PurchaseVoucher(address from,uint256 amount, string message)")));
 
     /**
      * Build a new ERC20Gateway from the given token address
@@ -84,11 +78,12 @@ contract BarGateway is Gateway, IBarGateway {
      * @param nonce  Nonce to use
      * @param deadline  Voucher deadline to use
      * @param from  Transfer origin to use
-     * @param lineItems  Line items to use
+     * @param amount  Amount to use
+     * @param message  Message to use
      * @return voucher  The generated voucher
      */
-    function buildPurchaseVoucher(uint256 nonce, uint256 deadline, address from, LineItem[] calldata lineItems) external pure returns (Voucher memory voucher) {
-        voucher = _buildPurchaseVoucher(nonce, deadline, from, lineItems);
+    function buildPurchaseVoucher(uint256 nonce, uint256 deadline, address from, uint256 amount, string calldata message) external pure returns (Voucher memory voucher) {
+        voucher = _buildPurchaseVoucher(nonce, deadline, from, amount, message);
     }
 
     /**
@@ -96,11 +91,12 @@ contract BarGateway is Gateway, IBarGateway {
      *
      * @param nonce  Nonce to use
      * @param from  Transfer origin to use
-     * @param lineItems  Line items to use
+     * @param amount  Amount to use
+     * @param message  Message to use
      * @return voucher  The generated voucher
      */
-    function buildPurchaseVoucher(uint256 nonce, address from, LineItem[] calldata lineItems) external view returns (Voucher memory voucher) {
-        voucher = _buildPurchaseVoucher(nonce, block.timestamp + 1 hours, from, lineItems);
+    function buildPurchaseVoucher(uint256 nonce, address from, uint256 amount, string calldata message) external view returns (Voucher memory voucher) {
+        voucher = _buildPurchaseVoucher(nonce, block.timestamp + 1 hours, from, amount, message);
     }
 
     /**
@@ -109,15 +105,16 @@ contract BarGateway is Gateway, IBarGateway {
      * @param nonce  Nonce to use
      * @param deadline  Voucher deadline to use
      * @param from  Transfer origin to use
-     * @param lineItems  Line items to use
+     * @param amount  Amount to use
+     * @param message  Message to use
      * @return voucher  The generated voucher
      */
-    function _buildPurchaseVoucher(uint256 nonce, uint256 deadline, address from, LineItem[] calldata lineItems) internal pure returns (Voucher memory voucher) {
+    function _buildPurchaseVoucher(uint256 nonce, uint256 deadline, address from, uint256 amount, string calldata message) internal pure returns (Voucher memory voucher) {
         voucher = Voucher(
             PURCHASE_VOUCHER_TAG,
             nonce,
             deadline,
-            abi.encode(PurchaseVoucher(from, lineItems)),
+            abi.encode(PurchaseVoucher(from, amount, message)),
             bytes("")
         );
     }
@@ -128,31 +125,9 @@ contract BarGateway is Gateway, IBarGateway {
      * @param voucher  Voucher to generate the user-readable message of
      * @return message  The voucher's generated user-readable message
      */
-    function _generatePurchaseVoucherMessage(Voucher calldata voucher) internal view returns (string memory message) {
+    function _generatePurchaseVoucherMessage(Voucher calldata voucher) internal pure returns (string memory message) {
         PurchaseVoucher memory decodedVoucher = abi.decode(voucher.payload, (PurchaseVoucher));
-        message = string.concat(
-            "Purchase\n",
-            string.concat("from: ", decodedVoucher.from.toString())
-        );
-        uint8 decimals = IERC20Metadata(_token).decimals();
-        string memory symbol = IERC20Metadata(_token).symbol();
-        uint256 total = 0;
-        for (uint256 i = 0; i < decodedVoucher.lineItems.length; i++) {
-            int256 value = decodedVoucher.lineItems[i].value;
-            message = string.concat(
-                message,
-                string.concat("\n", i.toString(), ": ", decodedVoucher.lineItems[i].item, " = ", symbol, " ", value.toString(decimals))
-            );
-            if (value < 0) {
-                total -= uint256(value);
-            } else {
-                total += uint256(value);
-            }
-        }
-        message = string.concat(
-            message,
-            string.concat("\nTOTAL = ", symbol, " ", total.toString(decimals))
-        );
+        message = decodedVoucher.message;
     }
 
     /**
@@ -173,17 +148,8 @@ contract BarGateway is Gateway, IBarGateway {
      */
     function _executePurchaseVoucher(Voucher calldata voucher) internal {
         PurchaseVoucher memory decodedVoucher = abi.decode(voucher.payload, (PurchaseVoucher));
-        uint256 total = 0;
-        for (uint i = 0; i < decodedVoucher.lineItems.length; i++) {
-            int256 value = decodedVoucher.lineItems[i].value;
-            if (value < 0) {
-                total -= uint256(value);
-            } else {
-                total += uint256(value);
-            }
-        }
-        if (0 < total) {
-            IERC20(_token).safeTransferFrom(decodedVoucher.from, _destination, total);
+        if (0 < decodedVoucher.amount) {
+            IERC20(_token).safeTransferFrom(decodedVoucher.from, _destination, decodedVoucher.amount);
         }
     }
 }
