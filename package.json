@@ -1,15 +1,21 @@
 {
   "name": "@lacrypta/bar-gateway",
-  "version": "0.8.3",
+  "version": "0.8.7",
   "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lacrypta/gateway.git"
+  },
   "scripts": {
     "compile": "hardhat compile",
+    "postcompile": "yarn typechain --target=ethers-v5 'deployments/hardhat/*.json' --out-dir=typechain",
     "deploy": "hardhat run ./scripts/deploy.ts"
   },
   "files": [
     "contracts/**",
     "typechain/**",
-    "deployments/matic/**"
+    "deployments/matic/**",
+    "artifacts/contracts/**"
   ],
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
