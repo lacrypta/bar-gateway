@@ -47,7 +47,7 @@ contract BarGateway is ERC20Gateway, IBarGateway {
      * @param message  Bar message to use
      * @return voucher  The generated voucher
      */
-    function buildBarTransferFromVoucher(uint256 nonce, uint256 deadline, address from, address to, uint256 amount, string calldata message) external view returns (Voucher memory voucher) {
+    function buildBarTransferFromVoucher(uint256 nonce, uint256 deadline, address from, address to, uint256 amount, string calldata message) external pure returns (Voucher memory voucher) {
         voucher = _buildBarTransferFromVoucher(nonce, deadline, from, to, amount, message);
     }
 
@@ -92,7 +92,7 @@ contract BarGateway is ERC20Gateway, IBarGateway {
      * @param voucher  Voucher to generate the user-readable message of
      * @return message  The voucher's generated user-readable message
      */
-    function _generateBarStyleTransferFromVoucherMessage(Voucher calldata voucher) internal view returns (string memory message) {
+    function _generateBarStyleTransferFromVoucherMessage(Voucher calldata voucher) internal pure returns (string memory message) {
         abi.decode(voucher.payload, (TransferFromVoucher));  // make sure we can decode the body
         message = abi.decode(voucher.metadata, (BarMetadata)).message;
     }
