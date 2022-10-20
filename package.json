@@ -1,10 +1,10 @@
 {
   "name": "@lacrypta/bar-gateway",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "license": "AGPL-3.0-or-later",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lacrypta/gateway.git"
+    "url": "git+https://github.com/lacrypta/bar-gateway.git"
   },
   "scripts": {
     "compile": "hardhat compile",
