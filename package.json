@@ -8,7 +8,7 @@
   },
   "scripts": {
     "compile": "hardhat compile",
-    "postcompile": "yarn typechain --target=ethers-v5 'deployments/hardhat/*.json' --out-dir=typechain",
+    "postcompile": "yarn typechain --target=ethers-v5 'deployments/localhost/*.json' --out-dir=typechain",
     "deploy": "hardhat run ./scripts/deploy.ts",
     "chain": "hardhat node --network hardhat",
     "build": "tsc --build"
