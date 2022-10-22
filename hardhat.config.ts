@@ -27,6 +27,7 @@ const GAS_PRICE = parseFloat(process.env.GAS_PRICE || "1");
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY ?? "";
 
 const config: HardhatUserConfig = {
+  defaultNetwork: "localhost",
   solidity: {
     compilers: [
       {
@@ -54,6 +55,17 @@ const config: HardhatUserConfig = {
     ],
   },
   networks: {
+    hardhat: {
+      chainId: 137,
+      forking: {
+        blockNumber: 34637771,
+        url: "https://polygon-rpc.com",
+      },
+    },
+    localhost: {
+      chainId: 137,
+      url: "http://localhost:8545",
+    },
     matic: {
       timeout: 1000000,
       chainId: 137,
