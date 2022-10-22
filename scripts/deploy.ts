@@ -31,7 +31,7 @@ async function main() {
     contract: "BarGateway",
     from: deployer,
     log: true,
-    args: [peronioAddress],
+    args: [peronioAddress, "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"],
     libraries: { ToString: toStringAddress },
   });
   const barGatewayAddress = (await hre.deployments.get("BarGateway")).address;
