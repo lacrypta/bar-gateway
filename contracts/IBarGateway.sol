@@ -40,13 +40,26 @@ interface IBarGateway is IGateway {
      * Build a PurchaseVoucher from the given parameters
      *
      * @param nonce  Nonce to use
-     * @param deadline  Voucher deadline to use
+     * @param validSince  Voucher validSince to use
+     * @param validUntil  Voucher validUntil to use
      * @param from  Transfer origin to use
      * @param amount  Amount to use
      * @param message  Message to use
      * @return voucher  The generated voucher
      */
-    function buildPurchaseVoucher(uint256 nonce, uint256 deadline, address from, uint256 amount, string calldata message) external view returns (Voucher memory voucher);
+    function buildPurchaseVoucher(uint256 nonce, uint256 validSince, uint256 validUntil, address from, uint256 amount, string calldata message) external view returns (Voucher memory voucher);
+
+    /**
+     * Build a PurchaseVoucher from the given parameters
+     *
+     * @param nonce  Nonce to use
+     * @param validUntil  Voucher validUntil to use
+     * @param from  Transfer origin to use
+     * @param amount  Amount to use
+     * @param message  Message to use
+     * @return voucher  The generated voucher
+     */
+    function buildPurchaseVoucher(uint256 nonce, uint256 validUntil, address from, uint256 amount, string calldata message) external view returns (Voucher memory voucher);
 
     /**
      * Build a PurchaseVoucher from the given parameters

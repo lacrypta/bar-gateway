@@ -26,7 +26,7 @@ contract BarGateway is Gateway, IBarGateway {
     // This is computed using the "encodeType" convention laid out in <https://eips.ethereum.org/EIPS/eip-712#definition-of-encodetype>.
     // Note that it is not REQUIRED to be so computed, but we do so anyways to minimize encoding conventions.
     uint32 public constant PURCHASE_VOUCHER_TAG =
-        uint32(bytes4(keccak256("PurchaseVoucher(address from,uint256 amount, string message)")));
+        uint32(bytes4(keccak256("PurchaseVoucher(address from,uint256 amount,string message)")));
 
     /**
      * Build a new ERC20Gateway from the given token address
@@ -76,14 +76,29 @@ contract BarGateway is Gateway, IBarGateway {
      * Build a PurchaseVoucher from the given parameters
      *
      * @param nonce  Nonce to use
-     * @param deadline  Voucher deadline to use
+     * @param validSince  Voucher validSince to use
+     * @param validUntil  Voucher validUntil to use
      * @param from  Transfer origin to use
      * @param amount  Amount to use
      * @param message  Message to use
      * @return voucher  The generated voucher
      */
-    function buildPurchaseVoucher(uint256 nonce, uint256 deadline, address from, uint256 amount, string calldata message) external pure returns (Voucher memory voucher) {
-        voucher = _buildPurchaseVoucher(nonce, deadline, from, amount, message);
+    function buildPurchaseVoucher(uint256 nonce, uint256 validSince, uint256 validUntil, address from, uint256 amount, string calldata message) external pure override returns (Voucher memory voucher) {
+        voucher = _buildPurchaseVoucher(nonce, validSince, validUntil, from, amount, message);
+    }
+
+    /**
+     * Build a PurchaseVoucher from the given parameters
+     *
+     * @param nonce  Nonce to use
+     * @param validUntil  Voucher validUntil to use
+     * @param from  Transfer origin to use
+     * @param amount  Amount to use
+     * @param message  Message to use
+     * @return voucher  The generated voucher
+     */
+    function buildPurchaseVoucher(uint256 nonce, uint256 validUntil, address from, uint256 amount, string calldata message) external view override returns (Voucher memory voucher) {
+        voucher = _buildPurchaseVoucher(nonce, block.timestamp, validUntil, from, amount, message);
     }
 
     /**
@@ -95,25 +110,27 @@ contract BarGateway is Gateway, IBarGateway {
      * @param message  Message to use
      * @return voucher  The generated voucher
      */
-    function buildPurchaseVoucher(uint256 nonce, address from, uint256 amount, string calldata message) external view returns (Voucher memory voucher) {
-        voucher = _buildPurchaseVoucher(nonce, block.timestamp + 1 hours, from, amount, message);
+    function buildPurchaseVoucher(uint256 nonce, address from, uint256 amount, string calldata message) external view override returns (Voucher memory voucher) {
+        voucher = _buildPurchaseVoucher(nonce, block.timestamp, block.timestamp + 1 hours, from, amount, message);
     }
 
     /**
      * Build a Voucher from the given parameters
      *
      * @param nonce  Nonce to use
-     * @param deadline  Voucher deadline to use
+     * @param validSince  Voucher validSince to use
+     * @param validUntil  Voucher validUntil to use
      * @param from  Transfer origin to use
      * @param amount  Amount to use
      * @param message  Message to use
      * @return voucher  The generated voucher
      */
-    function _buildPurchaseVoucher(uint256 nonce, uint256 deadline, address from, uint256 amount, string calldata message) internal pure returns (Voucher memory voucher) {
+    function _buildPurchaseVoucher(uint256 nonce, uint256 validSince, uint256 validUntil, address from, uint256 amount, string calldata message) internal pure returns (Voucher memory voucher) {
         voucher = Voucher(
             PURCHASE_VOUCHER_TAG,
             nonce,
-            deadline,
+            validSince,
+            validUntil,
             abi.encode(PurchaseVoucher(from, amount, message)),
             bytes("")
         );
