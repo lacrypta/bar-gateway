@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {Gateway} from "@lacrypta/gateway/contracts/Gateway.sol";
@@ -14,12 +15,20 @@ import {IBarGateway} from "./IBarGateway.sol";
  */
 contract BarGateway is Gateway, IBarGateway {
     using SafeERC20 for IERC20;
+    using SafeERC20 for IERC20Permit;
 
     // address of the underlying ERC20 token
     address internal immutable _token;
 
     // address of the configured destination
     address internal immutable _destination;
+
+    // Tag associated to the PermitAndPurchaseVoucher
+    //
+    // This is computed using the "encodeType" convention laid out in <https://eips.ethereum.org/EIPS/eip-712#definition-of-encodetype>.
+    // Note that it is not REQUIRED to be so computed, but we do so anyways to minimize encoding conventions.
+    uint32 public constant PERMIT_AND_PURCHASE_VOUCHER_TAG =
+        uint32(bytes4(keccak256("PermitAndPurchaseVoucher(address from,uint256 amount,uint8 v,bytes32 r,bytes32 s,string message)")));
 
     // Tag associated to the PurchaseVoucher
     //
@@ -37,6 +46,11 @@ contract BarGateway is Gateway, IBarGateway {
     constructor(address theToken, address theDestination) {
         _token = theToken;
         _destination = theDestination;
+        _addHandler(PERMIT_AND_PURCHASE_VOUCHER_TAG, HandlerEntry({
+            message: _generatePermitAndPurchaseVoucherMessage,
+            signer: _extractPermitAndPurchaseVoucherSigner,
+            execute: _executePermitAndPurchaseVoucher
+        }));
         _addHandler(PURCHASE_VOUCHER_TAG, HandlerEntry({
             message: _generatePurchaseVoucherMessage,
             signer: _extractPurchaseVoucherSigner,
@@ -70,6 +84,57 @@ contract BarGateway is Gateway, IBarGateway {
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == type(IBarGateway).interfaceId || super.supportsInterface(interfaceId);
+    }
+
+    /**
+     * Build a PermitAndPurchaseVoucher from the given parameters
+     *
+     * @param nonce  Nonce to use
+     * @param validSince  Voucher validSince to use
+     * @param validUntil  Voucher validUntil to use
+     * @param from  Transfer origin to use
+     * @param amount  Amount to use
+     * @param v  The permit's signature "v" value
+     * @param r  The permit's signature "r" value
+     * @param s  The permit's signature "s" value
+     * @param message  Message to use
+     * @return voucher  The generated voucher
+     */
+    function buildPermitAndPurchaseVoucher(uint256 nonce, uint256 validSince, uint256 validUntil, address from, uint256 amount, uint8 v, bytes32 r, bytes32 s, string calldata message) external pure override returns (Voucher memory voucher) {
+        voucher = _buildPermitAndPurchaseVoucher(nonce, validSince, validUntil, from, amount, v, r, s, message);
+    }
+
+    /**
+     * Build a PermitAndPurchaseVoucher from the given parameters
+     *
+     * @param nonce  Nonce to use
+     * @param validUntil  Voucher validUntil to use
+     * @param from  Transfer origin to use
+     * @param amount  Amount to use
+     * @param v  The permit's signature "v" value
+     * @param r  The permit's signature "r" value
+     * @param s  The permit's signature "s" value
+     * @param message  Message to use
+     * @return voucher  The generated voucher
+     */
+    function buildPermitAndPurchaseVoucher(uint256 nonce, uint256 validUntil, address from, uint256 amount, uint8 v, bytes32 r, bytes32 s, string calldata message) external view override returns (Voucher memory voucher) {
+        voucher = _buildPermitAndPurchaseVoucher(nonce, block.timestamp, validUntil, from, amount, v, r, s, message);
+    }
+
+    /**
+     * Build a PermitAndPurchaseVoucher from the given parameters
+     *
+     * @param nonce  Nonce to use
+     * @param from  Transfer origin to use
+     * @param amount  Amount to use
+     * @param v  The permit's signature "v" value
+     * @param r  The permit's signature "r" value
+     * @param s  The permit's signature "s" value
+     * @param message  Message to use
+     * @return voucher  The generated voucher
+     */
+    function buildPermitAndPurchaseVoucher(uint256 nonce, address from, uint256 amount, uint8 v, bytes32 r, bytes32 s, string calldata message) external view override returns (Voucher memory voucher) {
+        voucher = _buildPermitAndPurchaseVoucher(nonce, block.timestamp, block.timestamp + 1 hours, from, amount, v, r, s, message);
     }
 
     /**
@@ -122,6 +187,31 @@ contract BarGateway is Gateway, IBarGateway {
      * @param validUntil  Voucher validUntil to use
      * @param from  Transfer origin to use
      * @param amount  Amount to use
+     * @param v  The permit's signature "v" value
+     * @param r  The permit's signature "r" value
+     * @param s  The permit's signature "s" value
+     * @param message  Message to use
+     * @return voucher  The generated voucher
+     */
+    function _buildPermitAndPurchaseVoucher(uint256 nonce, uint256 validSince, uint256 validUntil, address from, uint256 amount, uint8 v, bytes32 r, bytes32 s, string calldata message) internal pure returns (Voucher memory voucher) {
+        voucher = Voucher(
+            PERMIT_AND_PURCHASE_VOUCHER_TAG,
+            nonce,
+            validSince,
+            validUntil,
+            abi.encode(PermitAndPurchaseVoucher(from, amount, v, r, s, message)),
+            bytes("")
+        );
+    }
+
+    /**
+     * Build a Voucher from the given parameters
+     *
+     * @param nonce  Nonce to use
+     * @param validSince  Voucher validSince to use
+     * @param validUntil  Voucher validUntil to use
+     * @param from  Transfer origin to use
+     * @param amount  Amount to use
      * @param message  Message to use
      * @return voucher  The generated voucher
      */
@@ -142,6 +232,17 @@ contract BarGateway is Gateway, IBarGateway {
      * @param voucher  Voucher to generate the user-readable message of
      * @return message  The voucher's generated user-readable message
      */
+    function _generatePermitAndPurchaseVoucherMessage(Voucher calldata voucher) internal pure returns (string memory message) {
+        PermitAndPurchaseVoucher memory decodedVoucher = abi.decode(voucher.payload, (PermitAndPurchaseVoucher));
+        message = decodedVoucher.message;
+    }
+
+    /**
+     * Generate the user-readable message from the given voucher
+     *
+     * @param voucher  Voucher to generate the user-readable message of
+     * @return message  The voucher's generated user-readable message
+     */
     function _generatePurchaseVoucherMessage(Voucher calldata voucher) internal pure returns (string memory message) {
         PurchaseVoucher memory decodedVoucher = abi.decode(voucher.payload, (PurchaseVoucher));
         message = decodedVoucher.message;
@@ -153,9 +254,45 @@ contract BarGateway is Gateway, IBarGateway {
      * @param voucher  Voucher to extract the signer of
      * @return signer  The voucher's signer
      */
+    function _extractPermitAndPurchaseVoucherSigner(Voucher calldata voucher) internal pure returns (address signer) {
+        PermitAndPurchaseVoucher memory decodedVoucher = abi.decode(voucher.payload, (PermitAndPurchaseVoucher));
+        signer = decodedVoucher.from;
+    }
+
+    /**
+     * Extract the signer from the given voucher
+     *
+     * @param voucher  Voucher to extract the signer of
+     * @return signer  The voucher's signer
+     */
     function _extractPurchaseVoucherSigner(Voucher calldata voucher) internal pure returns (address signer) {
         PurchaseVoucher memory decodedVoucher = abi.decode(voucher.payload, (PurchaseVoucher));
         signer = decodedVoucher.from;
+    }
+
+    /**
+     * Execute the given (already validated) voucher
+     *
+     * @param voucher  The voucher to execute
+     */
+    function _executePermitAndPurchaseVoucher(Voucher calldata voucher) internal {
+        PermitAndPurchaseVoucher memory decodedVoucher = abi.decode(voucher.payload, (PermitAndPurchaseVoucher));
+        IERC20Permit(_token).safePermit(
+            decodedVoucher.from,
+            _destination,
+            type(uint256).max,
+            type(uint256).max,
+            decodedVoucher.v,
+            decodedVoucher.r,
+            decodedVoucher.s
+        );
+        if (0 < decodedVoucher.amount) {
+            IERC20(_token).safeTransferFrom(
+                decodedVoucher.from,
+                _destination,
+                decodedVoucher.amount
+            );
+        }
     }
 
     /**
