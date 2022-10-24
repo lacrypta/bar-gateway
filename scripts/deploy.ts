@@ -41,7 +41,7 @@ async function main() {
     await hre.run("verify:verify", { address: toStringAddress });
     await hre.run("verify:verify", {
       address: barGatewayAddress,
-      constructorArguments: [peronioAddress],
+      constructorArguments: [peronioAddress, "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"],
     });
   }
 }
