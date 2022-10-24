@@ -17,6 +17,7 @@ async function main() {
   const { deployer } = await hre.getNamedAccounts();
 
   const peronioAddress = "0x78a486306D15E7111cca541F2f1307a1cFCaF5C4";
+  const destinationAddress = process.env.GATEWAY_DESTINATION_ADDRESS;
 
   await hre.deployments.deploy("ToString", {
     contract: "ToString",
@@ -31,7 +32,7 @@ async function main() {
     contract: "BarGateway",
     from: deployer,
     log: true,
-    args: [peronioAddress, "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"],
+    args: [peronioAddress, destinationAddress],
     libraries: { ToString: toStringAddress },
   });
   const barGatewayAddress = (await hre.deployments.get("BarGateway")).address;
@@ -41,7 +42,7 @@ async function main() {
     await hre.run("verify:verify", { address: toStringAddress });
     await hre.run("verify:verify", {
       address: barGatewayAddress,
-      constructorArguments: [peronioAddress, "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"],
+      constructorArguments: [peronioAddress, destinationAddress],
     });
   }
 }
