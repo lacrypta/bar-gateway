@@ -33,17 +33,31 @@ async function main() {
     contract: "BarGateway",
     from: deployer,
     log: true,
-    args: [peronioAddress, destinationAddress, migratorAddress],
+    args: [peronioAddress, destinationAddress],
     libraries: { ToString: toStringAddress },
   });
   const barGatewayAddress = (await hre.deployments.get("BarGateway")).address;
   console.log("Bar Gateway deployed to:", barGatewayAddress);
 
+  await hre.deployments.deploy("MigrateGateway", {
+    contract: "MigrateGateway",
+    from: deployer,
+    log: true,
+    args: [peronioAddress, migratorAddress],
+    libraries: { ToString: toStringAddress },
+  });
+  const migrateGatewayAddress = (await hre.deployments.get("MigrateGateway")).address;
+  console.log("Migrate Gateway deployed to:", migrateGatewayAddress);
+
   if (hre.network.name == "matic") {
     await hre.run("verify:verify", { address: toStringAddress });
     await hre.run("verify:verify", {
       address: barGatewayAddress,
-      constructorArguments: [peronioAddress, destinationAddress, migratorAddress],
+      constructorArguments: [peronioAddress, destinationAddress],
+    });
+    await hre.run("verify:verify", {
+      address: migrateGatewayAddress,
+      constructorArguments: [peronioAddress, migratorAddress],
     });
   }
 }
