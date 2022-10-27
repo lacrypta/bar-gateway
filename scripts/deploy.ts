@@ -16,7 +16,7 @@ async function main() {
 
   const { deployer } = await hre.getNamedAccounts();
 
-  const peronioAddress = "0x78a486306D15E7111cca541F2f1307a1cFCaF5C4";
+  const peronioAddress = process.env.PERONIO_ADDRESS;
   const destinationAddress = process.env.DESTINATION_ADDRESS;
 
   await hre.deployments.deploy("ToString", {
