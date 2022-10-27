@@ -972,6 +972,13 @@
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.7.3.tgz#939534757a81f8d69cc854c7692805684ff3111e"
   integrity sha512-dGRS0agJzu8ybo44pCIf3xBaPQN/65AIXNgK8+4gzKd5kbvlqyxryUYVLJv7fK98Seyd2hDZzVEHSWAh0Bt1Yw==
 
+"@peronio/core@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@peronio/core/-/core-2.0.1.tgz#d11ba6e42a6373a5c405e438b18452353ff33985"
+  integrity sha512-7idu0qPdl/CC+ua974CfdDmEg9xVtKKN8XkrFE6oIOxeE4h+87zpeUn0c2nu3qMz97t59/sMMAKO2EMEawRrCg==
+  dependencies:
+    yarn "=1.22.19"
+
 "@resolver-engine/core@^0.3.3":
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/@resolver-engine/core/-/core-0.3.3.tgz#590f77d85d45bc7ecc4e06c654f41345db6ca967"

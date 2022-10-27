@@ -18,6 +18,7 @@ async function main() {
 
   const peronioAddress = process.env.PERONIO_ADDRESS;
   const destinationAddress = process.env.DESTINATION_ADDRESS;
+  const migratorAddress = process.env.MIGRATOR_ADDRESS;
 
   await hre.deployments.deploy("ToString", {
     contract: "ToString",
@@ -32,7 +33,7 @@ async function main() {
     contract: "BarGateway",
     from: deployer,
     log: true,
-    args: [peronioAddress, destinationAddress],
+    args: [peronioAddress, destinationAddress, migratorAddress],
     libraries: { ToString: toStringAddress },
   });
   const barGatewayAddress = (await hre.deployments.get("BarGateway")).address;
@@ -42,7 +43,7 @@ async function main() {
     await hre.run("verify:verify", { address: toStringAddress });
     await hre.run("verify:verify", {
       address: barGatewayAddress,
-      constructorArguments: [peronioAddress, destinationAddress],
+      constructorArguments: [peronioAddress, destinationAddress, migratorAddress],
     });
   }
 }
